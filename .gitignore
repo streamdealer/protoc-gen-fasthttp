@@ -28,5 +28,13 @@ go.work.sum
 .env
 
 # Editor/IDE
-# .idea/
-# .vscode/
+ .idea/
+ .vscode/
+
+# Locals
+third_party/
+cmd/example/
+gen/
+proto/
+docker/
+Makefile
