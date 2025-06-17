@@ -4,6 +4,9 @@ package {{.Package}}
 
 import (
 	"context"
+
+	"google.golang.org/protobuf/proto"
+	"github.com/streamdealer/protoc-gen-fasthttp/pkg/interceptor"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 
@@ -26,21 +29,31 @@ func (Unimplemented{{$.ServerName}}) {{.RPCName}}(context.Context, *{{.RequestTy
 }
 {{- end }}
 
-func Register{{.ServiceName}}Routes(r *router.Router, impl {{.ServerName}}) {
+func Register{{.ServiceName}}Routes(r *router.Router, impl {{.ServerName}}, interceptors interceptor.Chain) {
 	{{- range .RPCs }}
-	r.{{.HTTPVerb}}("{{.HTTPPath}}", {{.HandlerName}}(impl))
+	r.{{.HTTPVerb}}("{{.HTTPPath}}", {{.HandlerName}}(impl, interceptors))
 	{{- end }}
 }
 
 {{- range .RPCs }}
 func {{.HandlerName}}(
 	impl {{$.ServerName}},
+	interceptors interceptor.Chain,
 ) fasthttp.RequestHandler {
 	return func(ctx *fasthttp.RequestCtx) {
 		var req = &{{.RequestType}}{}
 
 		http.ToProto(ctx, req)
-		resp, err := impl.{{.RPCName}}(ctx, req)
+
+		wrapped := func(ctx context.Context, req proto.Message) (proto.Message, error) {
+			r, ok := req.(*{{.RequestType}})
+			if !ok {
+				return nil, status.Errorf(codes.InvalidArgument, "expected *{{.RequestType}}, got %T", req)
+			}
+			return impl.{{.RPCName}}(ctx, r)
+		}
+
+		resp, err := interceptors.Apply()(ctx, req, nil, wrapped)
 
 		http.RespondWith(ctx, resp, err)
 	}

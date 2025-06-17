@@ -20,14 +20,12 @@ func ToProto(ctx *fasthttp.RequestCtx, msg proto.Message) {
 	m := msg.ProtoReflect()
 	mDesc := m.Descriptor()
 
-	// Query parameters
 	ctx.QueryArgs().VisitAll(func(k, v []byte) {
 		if fd := mDesc.Fields().ByName(protoreflect.Name(k)); fd != nil {
 			setProtoField(m, fd, string(v))
 		}
 	})
 
-	// Path parameters
 	ctx.VisitUserValues(func(k []byte, v any) {
 		if fd := mDesc.Fields().ByName(protoreflect.Name(k)); fd != nil {
 			setProtoField(m, fd, v.(string))
