@@ -139,10 +139,6 @@ curl -X POST http://localhost:8080/v1/hello \
 }
 ```
 
-### 🧪 Protobuf HTTP (optional binary)
-
-If using raw protobuf instead of JSON (e.g. for gRPC gateway interop), set the `Content-Type: application/protobuf`.
-
 ---
 
 ## 📜 License
