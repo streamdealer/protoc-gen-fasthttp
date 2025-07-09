@@ -8,12 +8,16 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-func ToProto(ctx *fasthttp.RequestCtx, msg proto.Message) {
+func ToProto(ctx *fasthttp.RequestCtx, msg proto.Message) error {
 	if len(ctx.PostBody()) > 0 {
-		err := protojson.Unmarshal(ctx.PostBody(), msg)
+		pjOpts := protojson.UnmarshalOptions{
+			AllowPartial:   true,
+			DiscardUnknown: true,
+		}
+		err := pjOpts.Unmarshal(ctx.PostBody(), msg)
 		if err != nil {
 			ctx.Error("Invalid JSON body", fasthttp.StatusBadRequest)
-			return
+			return err
 		}
 	}
 
@@ -31,6 +35,8 @@ func ToProto(ctx *fasthttp.RequestCtx, msg proto.Message) {
 			setProtoField(m, fd, v.(string))
 		}
 	})
+
+	return nil
 }
 
 func setProtoField(msg protoreflect.Message, fd protoreflect.FieldDescriptor, val string) {
