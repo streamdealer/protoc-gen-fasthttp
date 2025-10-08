@@ -6,7 +6,6 @@ import (
 	"github.com/valyala/fasthttp"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -18,7 +17,7 @@ func RespondWith(ctx *fasthttp.RequestCtx, resp proto.Message, err error) {
 		return
 	}
 
-	data, _ := protojson.Marshal(resp)
+	data, _ := MarshalerCtx(ctx).Marshal(resp)
 	ctx.SetStatusCode(fasthttp.StatusOK)
 	ctx.SetBody(data)
 }

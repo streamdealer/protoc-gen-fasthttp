@@ -14,7 +14,7 @@ func ToProto(ctx *fasthttp.RequestCtx, msg proto.Message) error {
 			AllowPartial:   true,
 			DiscardUnknown: true,
 		}
-		err := pjOpts.Unmarshal(ctx.PostBody(), msg)
+		err := UnmarshalerCtx(ctx).Unmarshal(ctx.PostBody(), msg)
 		if err != nil {
 			ctx.Error("Invalid JSON body", fasthttp.StatusBadRequest)
 			return err
