@@ -43,7 +43,7 @@ func {{.HandlerName}}(
 	return func(ctx *fasthttp.RequestCtx) {
 		var req = &{{.RequestType}}{}
 
-		err = http.ToProto(ctx, req)
+		err := http.ToProto(ctx, req)
 
 		wrapped := func(ctx context.Context, req proto.Message) (proto.Message, error) {
 			r, ok := req.(*{{.RequestType}})
