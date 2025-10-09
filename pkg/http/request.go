@@ -3,17 +3,12 @@ package http
 import (
 	"github.com/spf13/cast"
 	"github.com/valyala/fasthttp"
-	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 func ToProto(ctx *fasthttp.RequestCtx, msg proto.Message) error {
 	if len(ctx.PostBody()) > 0 {
-		pjOpts := protojson.UnmarshalOptions{
-			AllowPartial:   true,
-			DiscardUnknown: true,
-		}
 		err := UnmarshalerCtx(ctx).Unmarshal(ctx.PostBody(), msg)
 		if err != nil {
 			ctx.Error("Invalid JSON body", fasthttp.StatusBadRequest)
