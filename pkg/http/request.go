@@ -1,6 +1,8 @@
 package http
 
 import (
+	"bytes"
+
 	"github.com/spf13/cast"
 	"github.com/valyala/fasthttp"
 	"google.golang.org/protobuf/proto"
@@ -8,11 +10,15 @@ import (
 )
 
 func ToProto(ctx *fasthttp.RequestCtx, msg proto.Message) error {
+	contentType := ctx.Request.Header.ContentType()
 	if len(ctx.PostBody()) > 0 {
-		err := UnmarshalerCtx(ctx).Unmarshal(ctx.PostBody(), msg)
-		if err != nil {
-			ctx.Error("Invalid JSON body", fasthttp.StatusBadRequest)
-			return err
+		switch {
+		case bytes.HasPrefix(contentType, []byte("application/json")):
+			err := UnmarshalerCtx(ctx).Unmarshal(ctx.PostBody(), msg)
+			if err != nil {
+				ctx.Error("Invalid JSON body", fasthttp.StatusBadRequest)
+				return err
+			}
 		}
 	}
 
