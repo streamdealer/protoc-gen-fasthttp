@@ -25,10 +25,12 @@ func ToProto(ctx *fasthttp.RequestCtx, msg proto.Message) error {
 	m := msg.ProtoReflect()
 	mDesc := m.Descriptor()
 
-	ctx.QueryArgs().VisitAll(func(k, v []byte) {
+	ctx.QueryArgs().All()(func(k, v []byte) bool {
 		if fd := mDesc.Fields().ByName(protoreflect.Name(k)); fd != nil {
 			setProtoField(m, fd, string(v))
 		}
+
+		return true
 	})
 
 	ctx.VisitUserValues(func(k []byte, v any) {
